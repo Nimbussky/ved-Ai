@@ -38,8 +38,8 @@ export function useAstrology() {
       
       const result = await response.json();
       setData(result);
-    } catch (err: any) {
-      setError(err.message || 'Unknown error occurred');
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Unknown error occurred');
     } finally {
       setLoading(false);
     }

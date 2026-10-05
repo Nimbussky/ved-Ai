@@ -37,12 +37,12 @@ export default function TransitsSection() {
         if (json.planets && Array.isArray(json.planets)) {
           // Filter some key planets for display
           const keyPlanets = ['Jupiter', 'Saturn', 'Rahu', 'Mars', 'Sun', 'Moon', 'Venus', 'Mercury', 'Ketu'];
-          const availablePlanets = json.planets.filter((p: any) => keyPlanets.includes(p.name));
+          const availablePlanets = json.planets.filter((p: PlanetData) => keyPlanets.includes(p.name));
           setTransits(availablePlanets.slice(0, 3)); // show top 3 like before
         } else {
           throw new Error('Invalid format');
         }
-      } catch (err) {
+      } catch {
         setError('Unable to load Current Transits at this moment.');
       } finally {
         setLoading(false);

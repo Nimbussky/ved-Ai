@@ -31,7 +31,7 @@ export default function PanchangSection() {
           sunrise: json.sunrise || 'N/A',
           sunset: json.sunset || 'N/A',
         });
-      } catch (err) {
+      } catch {
         setError('Unable to load Panchang data at this moment.');
       } finally {
         setLoading(false);
@@ -43,7 +43,7 @@ export default function PanchangSection() {
   if (loading) {
     return (
       <div className="bg-[#1A2338]/60 backdrop-blur-xl p-6 rounded-2xl border border-[#F7F7F5]/10">
-        <h3 className="text-lg font-medium mb-4 text-[#F7F7F5]">Today's Panchang</h3>
+        <h3 className="text-lg font-medium mb-4 text-[#F7F7F5]">Today&apos;s Panchang</h3>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 animate-pulse">
           {[1, 2, 3, 4].map((i) => (
             <div key={i} className="bg-[#0B1120]/60 rounded-xl p-4 border border-[#F7F7F5]/5 h-20">
@@ -57,7 +57,7 @@ export default function PanchangSection() {
   if (error) {
     return (
       <div className="bg-[#1A2338]/60 backdrop-blur-xl p-6 rounded-2xl border border-[#F7F7F5]/10">
-        <h3 className="text-lg font-medium mb-4 text-[#F7F7F5]">Today's Panchang</h3>
+        <h3 className="text-lg font-medium mb-4 text-[#F7F7F5]">Today&apos;s Panchang</h3>
         <p className="text-sm text-red-400">{error}</p>
       </div>
     );
@@ -72,7 +72,7 @@ export default function PanchangSection() {
 
   return (
     <div className="bg-[#1A2338]/60 backdrop-blur-xl p-6 rounded-2xl border border-[#F7F7F5]/10">
-      <h3 className="text-lg font-medium mb-4 text-[#F7F7F5]">Today's Panchang</h3>
+      <h3 className="text-lg font-medium mb-4 text-[#F7F7F5]">Today&apos;s Panchang</h3>
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {items.map((item) => (
           <div key={item.label} className="bg-[#0B1120]/60 rounded-xl p-4 border border-[#F7F7F5]/5">
