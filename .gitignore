@@ -1,0 +1,60 @@
+# ============================================
+# VEDAI — .gitignore
+# ============================================
+
+# Dependencies
+node_modules/
+
+# Build outputs
+.next/
+out/
+dist/
+build/
+
+# Environment (contains real API keys — NEVER commit)
+.env.local
+.env*.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Next.js
+.next/
+tsconfig.tsbuildinfo
+next-env.d.ts
+
+# Debug logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Drizzle
+drizzle/
+
+# Prisma leftovers (project uses Drizzle + D1 only)
+prisma/
+schema.sql
+
+# Local database
+*.db
+*.db-journal
+
+# Cloudflare / Vercel build artifacts
+.vercel/output/
+.wrangler/
+
+# QA outputs (local testing)
+qa_output*.md
+qa_task_input.txt
+qa_output_parallel.md
+
+# OS
+Thumbs.db
+Desktop.ini

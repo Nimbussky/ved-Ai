@@ -1,0 +1,17 @@
+name = "vedai-app"
+compatibility_date = "2025-07-19"
+compatibility_flags = ["nodejs_compat"]
+pages_build_output_dir = ".vercel/output/static"
+
+# Cloudflare only — uses pages:build, not the default next build
+[build]
+command = "npm run pages:build"
+watch_dir = "src"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "vedai-db"
+database_id = "c928c70b-0d38-4d51-bce1-85dd499b31cd"
+
+[vars]
+VEDASTRO_API_URL = "https://api.vedastro.org"
