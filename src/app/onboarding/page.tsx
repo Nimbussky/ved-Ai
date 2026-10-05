@@ -1,6 +1,7 @@
 'use client';
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { geocodeCity } from '@/lib/geocode';
 
 const OnboardingUI: React.FC = () => {
   const router = useRouter();
@@ -17,28 +18,6 @@ const OnboardingUI: React.FC = () => {
       }
     }
   }, [router]);
-
-  const geocodeCity = async (cityName: string): Promise<{ latitude: number; longitude: number; timezone: string } | null> => {
-    try {
-      const res = await fetch(
-        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(cityName)}&limit=1`,
-        { headers: { 'User-Agent': 'VedAI/1.0' } }
-      );
-      const data = await res.json();
-      if (data && data.length > 0) {
-        const lat = parseFloat(data[0].lat);
-        const lon = parseFloat(data[0].lon);
-        // Derive rough timezone offset from longitude
-        const utcOffset = Math.round(lon / 15);
-        // Etc/GMT uses inverted signs: UTC+5 = Etc/GMT-5
-        const timezone = `Etc/GMT${utcOffset <= 0 ? '+' : '-'}${Math.abs(utcOffset)}`;
-        return { latitude: lat, longitude: lon, timezone };
-      }
-    } catch (err) {
-      console.error('Geocoding failed:', err);
-    }
-    return null;
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

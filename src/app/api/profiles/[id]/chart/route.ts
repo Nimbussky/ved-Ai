@@ -41,7 +41,7 @@ export async function GET(
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 10000);
 
-    const response = await fetch(`${VEDASTRO_API}/api/PlanetPosition/${vedParams.toString()}`, {
+    const response = await fetch(`${VEDASTRO_API}/api/PlanetPosition?${vedParams.toString()}`, {
       headers: { 'Accept': 'application/json' },
       signal: controller.signal,
     });

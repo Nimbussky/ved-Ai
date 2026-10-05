@@ -19,7 +19,7 @@ export async function POST(request: Request) {
     const body = await request.json();
     const { date, time, latitude, longitude, timezone } = body;
 
-    if (!date || !latitude || !longitude) {
+    if (!date || latitude == null || longitude == null) {
       return NextResponse.json(
         { error: 'Missing required parameters: date, latitude, longitude' },
         { status: 400 }
@@ -37,7 +37,7 @@ export async function POST(request: Request) {
       Timezone: tz,
     });
 
-    const vedastroUrl = `${VEDASTRO_API}/api/PlanetPosition/${params.toString()}`;
+    const vedastroUrl = `${VEDASTRO_API}/api/PlanetPosition?${params.toString()}`;
 
     const cacheKey = `chart:${date}:${birthTime}:${latitude}:${longitude}:${tz}`;
 

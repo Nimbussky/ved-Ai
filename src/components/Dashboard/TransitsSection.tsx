@@ -8,7 +8,15 @@ type PlanetData = {
   sign: string;
 };
 
-export default function TransitsSection() {
+export default function TransitsSection({
+  latitude = 28.6139,
+  longitude = 77.2090,
+  timezone = 'Asia/Kolkata',
+}: {
+  latitude?: number;
+  longitude?: number;
+  timezone?: string;
+}) {
   const [transits, setTransits] = useState<PlanetData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -18,16 +26,16 @@ export default function TransitsSection() {
       try {
         const today = new Date().toISOString().split('T')[0];
         
-        // Let's assume user is around Delhi, India for dashboard defaults
+        // Uses caller-provided birth location (defaults to Delhi, India)
         const res = await fetch('/api/astrology', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             date: today,
             time: '12:00',
-            latitude: 28.6139,
-            longitude: 77.2090,
-            timezone: 'Asia/Kolkata',
+            latitude,
+            longitude,
+            timezone,
           }),
         });
         
@@ -49,7 +57,7 @@ export default function TransitsSection() {
       }
     }
     fetchTransits();
-  }, []);
+  }, [latitude, longitude, timezone]);
 
   if (loading) {
     return (

@@ -37,7 +37,12 @@ export async function GET(
   }
 
   try {
-    const now = new Date();
+    const url = new URL(_request.url);
+    const requestedDate = url.searchParams.get('date');
+    const now = requestedDate ? new Date(`${requestedDate}T12:00:00Z`) : new Date();
+    if (isNaN(now.getTime())) {
+      return Response.json({ error: 'Invalid date parameter (expected YYYY-MM-DD)' }, { status: 400 });
+    }
     const dateStr = now.toISOString().split('T')[0];
     const timeStr = now.toTimeString().slice(0, 5);
 
@@ -51,7 +56,7 @@ export async function GET(
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 10000);
 
-    const response = await fetch(`${VEDASTRO_API}/api/PlanetPosition/${vedParams.toString()}`, {
+    const response = await fetch(`${VEDASTRO_API}/api/PlanetPosition?${vedParams.toString()}`, {
       headers: { 'Accept': 'application/json' },
       signal: controller.signal,
     });

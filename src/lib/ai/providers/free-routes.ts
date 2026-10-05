@@ -58,7 +58,7 @@ export const zenMuxProvider: LLMProvider = makeOpenAICompatRoute({
   url: 'https://zenmux.ai/api/v1/chat/completions',
   keyEnv: 'ZENMUX_API_KEY',
   model: 'z-ai/glm-4.6v-flash-free',
-  priority: 6,
+  priority: 8,
 });
 
 // TokenRouter — free tier of major models through one gateway
@@ -68,7 +68,7 @@ export const kimiProvider: LLMProvider = makeOpenAICompatRoute({
   url: 'https://api.tokenrouter.com/v1/chat/completions',
   keyEnv: 'TOKENROUTER_KIMI_KEY',
   model: 'moonshotai/kimi-k3-free',
-  priority: 7,
+  priority: 9,
 });
 
 export const qwenProvider: LLMProvider = makeOpenAICompatRoute({
@@ -77,7 +77,7 @@ export const qwenProvider: LLMProvider = makeOpenAICompatRoute({
   url: 'https://api.tokenrouter.com/v1/chat/completions',
   keyEnv: 'TOKENROUTER_QWEN_KEY',
   model: 'qwen/qwen3.7-max',
-  priority: 8,
+  priority: 10,
 });
 
 export const tokenRouterDeepSeekProvider: LLMProvider = makeOpenAICompatRoute({
@@ -86,7 +86,7 @@ export const tokenRouterDeepSeekProvider: LLMProvider = makeOpenAICompatRoute({
   url: 'https://api.tokenrouter.com/v1/chat/completions',
   keyEnv: 'TOKENROUTER_DEEPSEEK_KEY',
   model: 'deepseek/deepseek-v4-pro',
-  priority: 9,
+  priority: 11,
 });
 
 export const miniMaxProvider: LLMProvider = makeOpenAICompatRoute({
@@ -95,7 +95,7 @@ export const miniMaxProvider: LLMProvider = makeOpenAICompatRoute({
   url: 'https://api.tokenrouter.com/v1/chat/completions',
   keyEnv: 'TOKENROUTER_MINIMAX_KEY',
   model: 'MiniMax-M3',
-  priority: 10,
+  priority: 12,
 });
 
 export const claudeProvider: LLMProvider = makeOpenAICompatRoute({
@@ -104,7 +104,7 @@ export const claudeProvider: LLMProvider = makeOpenAICompatRoute({
   url: 'https://api.tokenrouter.com/v1/chat/completions',
   keyEnv: 'TOKENROUTER_CLAUDE_KEY',
   model: 'anthropic/claude-fable-5',
-  priority: 11,
+  priority: 13,
 });
 
 export const gptProvider: LLMProvider = makeOpenAICompatRoute({
@@ -113,7 +113,7 @@ export const gptProvider: LLMProvider = makeOpenAICompatRoute({
   url: 'https://api.tokenrouter.com/v1/chat/completions',
   keyEnv: 'TOKENROUTER_GPT_KEY',
   model: 'openai/gpt-5.6-luna',
-  priority: 12,
+  priority: 14,
 });
 
 // HuggingFace free inference
@@ -123,7 +123,7 @@ export const huggingFaceProvider: LLMProvider = {
   url: 'https://router.huggingface.co/v1/chat/completions',
   getApiKey: () => process.env.HUGGINGFACE_API_KEY,
   model: 'meta-llama/Llama-3.3-70B-Instruct',
-  priority: 13,
+  priority: 15,
   supportsStreaming: true,
   buildHeaders: (key) => ({
     'Content-Type': 'application/json',

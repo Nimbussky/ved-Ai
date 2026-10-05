@@ -56,7 +56,7 @@ async function getChartData(profile: { date: string; time?: string; latitude: nu
   
   let res;
   try {
-    res = await fetch(`${VEDASTRO_API}/api/PlanetPosition/${params.toString()}`, {
+    res = await fetch(`${VEDASTRO_API}/api/PlanetPosition?${params.toString()}`, {
       headers: { 'Accept': 'application/json' },
       signal: controller.signal,
     });

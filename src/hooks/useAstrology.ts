@@ -6,15 +6,15 @@ type PlanetData = {
   degree: number;
   house: number;
   retrograde: boolean;
+  nakshatra?: string;
+  nakshatraPada?: number;
 };
 
 type AstrologyResponse = {
   planets: PlanetData[];
-  ascendant: {
-    sign: string;
-    degree: number;
-  };
-  ayanamsha: string;
+  cacheKey?: string;
+  source?: string;
+  timestamp?: string;
 };
 
 export function useAstrology() {
@@ -22,14 +22,20 @@ export function useAstrology() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const calculateChart = async (date: string, lat: number, lng: number) => {
+  const calculateChart = async (
+    date: string,
+    lat: number,
+    lng: number,
+    time = '12:00',
+    timezone = 'UTC'
+  ) => {
     setLoading(true);
     setError(null);
     try {
       const response = await fetch('/api/astrology', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ date, lat, lng }),
+        body: JSON.stringify({ date, time, latitude: lat, longitude: lng, timezone }),
       });
       
       if (!response.ok) {

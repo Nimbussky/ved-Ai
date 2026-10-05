@@ -111,14 +111,22 @@ const ChatBox: React.FC = () => {
     abortControllerRef.current = new AbortController();
 
     try {
+      // Send a slimmed payload: only planet essentials, not the whole stored blob
+      const slimChart = Array.isArray(chartData)
+        ? chartData.slice(0, 9).map((p) => ({
+            name: p.name, sign: p.sign, degree: p.degree,
+            house: p.house, retrograde: p.retrograde,
+            nakshatra: p.nakshatra,
+          }))
+        : chartData;
       const res = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: text, chartData }),
+        body: JSON.stringify({ message: text, chartData: slimChart }),
         signal: abortControllerRef.current.signal,
       });
 
-      if (!res.ok) throw new Error('Chat request failed');
+      if (!res.ok) throw new Error(`Chat request failed (${res.status})`);
 
       const reader = res.body?.getReader();
       const decoder = new TextDecoder();
@@ -138,6 +146,9 @@ const ChatBox: React.FC = () => {
             return updated;
           });
         }
+      }
+      if (!aiText.trim()) {
+        throw new Error('Empty response from AI');
       }
     } catch (err: unknown) {
       if (err instanceof Error && err.name === 'AbortError') return;

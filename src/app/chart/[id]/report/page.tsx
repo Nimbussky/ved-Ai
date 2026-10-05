@@ -55,15 +55,26 @@ export default function ReportPage() {
     }
   }
 
+  function escapeHtml(s: string): string {
+    return s
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
   function downloadPDF() {
     if (!report) return;
     const printWindow = window.open('', '_blank');
     if (!printWindow) return;
+    const safePlace = escapeHtml(profile?.place || 'Birth Chart');
+    const safeDate = escapeHtml(profile?.date || '');
     printWindow.document.write(`
       <!DOCTYPE html>
       <html>
       <head>
-        <title>VedAI Report - ${profile?.place || 'Birth Chart'}</title>
+        <title>VedAI Report - ${safePlace}</title>
         <style>
           body { font-family: Georgia, serif; max-width: 800px; margin: 40px auto; padding: 20px; color: #1a1a1a; line-height: 1.6; }
           h1 { color: #0B1120; border-bottom: 2px solid #D4A24C; padding-bottom: 10px; }
@@ -79,15 +90,16 @@ export default function ReportPage() {
         <div class="header">
           <div class="logo">VedAI</div>
           <div class="meta">Vedic Astrology Report | Generated: ${new Date().toLocaleDateString()}</div>
-          <div class="meta">${profile?.place || ''} | ${profile?.date || ''}</div>
+          <div class="meta">${safePlace} | ${safeDate}</div>
         </div>
         ${report.split('\n').map(line => {
-          if (line.startsWith('# ')) return `<h1>${line.replace('# ', '')}</h1>`;
-          if (line.startsWith('## ')) return `<h2>${line.replace('## ', '')}</h2>`;
-          if (line.startsWith('### ')) return `<h3>${line.replace('### ', '')}</h3>`;
-          if (line.startsWith('- ')) return `<li>${line.replace('- ', '')}</li>`;
+          const safe = escapeHtml(line);
+          if (line.startsWith('# ')) return `<h1>${escapeHtml(line.replace('# ', ''))}</h1>`;
+          if (line.startsWith('## ')) return `<h2>${escapeHtml(line.replace('## ', ''))}</h2>`;
+          if (line.startsWith('### ')) return `<h3>${escapeHtml(line.replace('### ', ''))}</h3>`;
+          if (line.startsWith('- ')) return `<li>${escapeHtml(line.replace('- ', ''))}</li>`;
           if (line.trim() === '') return '<br>';
-          return `<p>${line}</p>`;
+          return `<p>${safe}</p>`;
         }).join('')}
       </body>
       </html>

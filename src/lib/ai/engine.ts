@@ -1,7 +1,9 @@
 import type { LLMProvider } from './providers/types';
 import { getActiveProviders } from './providers';
 
-const PROVIDER_TIMEOUT_MS = 90000;
+const PROVIDER_TIMEOUT_MS = 30000;
+/** Overall deadline so Edge functions never hang — falls back to static text */
+const OVERALL_TIMEOUT_MS = 55000;
 /** Longer chats — OmniRouter / Engine 2 */
 const MAX_MESSAGE_LENGTH = 12000;
 const MAX_SYSTEM_EXTRA = 8000;
@@ -18,7 +20,10 @@ export async function* streamChat(
   chartData?: Record<string, unknown>,
 ): AsyncGenerator<{ chunk: string; provider: string }> {
   const trimmed = message.trim().slice(0, MAX_MESSAGE_LENGTH);
-  if (!trimmed) return;
+  if (!trimmed) {
+    yield { chunk: 'Namaste! Please type a question about Vedic astrology and I will answer.', provider: 'static' };
+    return;
+  }
 
   let fullPrompt = systemPrompt;
   if (chartData) {
@@ -27,8 +32,14 @@ export async function* streamChat(
   }
 
   const providers = getActiveProviders();
+  const startTime = Date.now();
 
   for (const provider of providers) {
+    // Overall deadline: stop cascading and fall through to static fallback
+    if (Date.now() - startTime > OVERALL_TIMEOUT_MS) {
+      console.log('[VedAI Omni] Overall deadline reached, using fallback');
+      break;
+    }
     // Extra retries on gateway providers (OpenRouter / free routers)
     const attempts =
       provider.slug === 'openrouter' || provider.slug === 'groq' ? 3 : 1;
@@ -43,7 +54,7 @@ export async function* streamChat(
 
         const apiKey = provider.getApiKey();
         const url = provider.slug === 'gemini'
-          ? `${provider.url}?key=${apiKey}`
+          ? `${provider.url}?key=${encodeURIComponent(apiKey || '')}`
           : provider.url;
 
         const response = await fetch(url, {
@@ -53,18 +64,21 @@ export async function* streamChat(
           signal: controller.signal,
         });
 
+        // Timeout only covers the initial fetch — streaming can run long,
+        // so disarm it before consuming the body.
+        clearTimeout(timeout);
+        timeout = undefined;
+
         if (!response.ok) {
-          clearTimeout(timeout);
           const err = await response.text().catch(() => '');
           console.error(`[VedAI Omni] ${provider.name} HTTP ${response.status}:`, err.slice(0, 200));
-          // Rate limit → try next attempt or next provider
-          if (response.status === 429 || response.status === 503) continue;
+          // Rate limit / transient upstream errors → try next attempt or next provider
+          if (response.status === 429 || response.status === 500 || response.status === 502 || response.status === 503 || response.status === 504) continue;
           break;
         }
 
         console.log(`[VedAI Omni] ${provider.name} SUCCESS`);
         yield* streamFromProvider(provider, response);
-        clearTimeout(timeout);
         return;
 
       } catch (err: unknown) {
@@ -75,22 +89,13 @@ export async function* streamChat(
     }
   }
 
-  console.log('[VedAI Omni] All streaming failed, trying non-streaming Groq...');
-  const fallback = providers.find((p) => p.slug === 'groq');
-  if (fallback?.getApiKey()) {
-    const result = await tryNonStreaming(fallback, trimmed, fullPrompt);
+  console.log('[VedAI Omni] All streaming failed, trying non-streaming fallback...');
+  for (const p of providers) {
+    if (Date.now() - startTime > OVERALL_TIMEOUT_MS) break;
+    if (!p.getApiKey()) continue;
+    const result = await tryNonStreaming(p, trimmed, fullPrompt);
     if (result) {
-      yield { chunk: result, provider: 'groq-fallback' };
-      return;
-    }
-  }
-
-  // OpenRouter non-stream last try
-  const or = providers.find((p) => p.slug === 'openrouter');
-  if (or?.getApiKey()) {
-    const result = await tryNonStreaming(or, trimmed, fullPrompt);
-    if (result) {
-      yield { chunk: result, provider: 'openrouter-fallback' };
+      yield { chunk: result, provider: `${p.slug}-fallback` };
       return;
     }
   }
@@ -101,7 +106,7 @@ export async function* streamChat(
 async function* streamFromProvider(provider: LLMProvider, response: Response) {
   const decoder = new TextDecoder();
   const reader = response.body?.getReader();
-  if (!reader) return;
+  if (!reader) throw new Error('Empty response body');
 
   let buffer = '';
 
@@ -234,7 +239,7 @@ async function tryNonStreaming(
 
     const apiKey = provider.getApiKey();
     const url = provider.slug === 'gemini'
-      ? `${provider.url.replace(':streamGenerateContent', ':generateContent')}?key=${apiKey}`
+      ? `${provider.url.replace(':streamGenerateContent', ':generateContent')}?key=${encodeURIComponent(apiKey || '')}`
       : provider.url;
 
     const response = await fetch(url, {

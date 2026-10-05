@@ -25,7 +25,8 @@ const PLANET_DASHA_YEARS: Record<string, number> = {
 
 function calculateDasha(nakshatraLord: string, birthDate: string) {
   const totalCycle = 120;
-  const startIdx = DASHA_SEQUENCE.findIndex(d => d.planet === nakshatraLord) || 0;
+  const foundIdx = DASHA_SEQUENCE.findIndex(d => d.planet === nakshatraLord);
+  const startIdx = foundIdx === -1 ? DASHA_SEQUENCE.findIndex(d => d.planet === 'Moon') : foundIdx;
   const birth = new Date(birthDate);
   const dashas: Array<{
     planet: string;
@@ -134,7 +135,7 @@ export async function GET(
     try {
       const controller = new AbortController();
       const timeout = setTimeout(() => controller.abort(), 10000);
-      const response = await fetch(`${VEDASTRO_API}/api/PlanetPosition/${vedParams.toString()}`, {
+      const response = await fetch(`${VEDASTRO_API}/api/PlanetPosition?${vedParams.toString()}`, {
         headers: { 'Accept': 'application/json' },
         signal: controller.signal,
       });
@@ -146,7 +147,9 @@ export async function GET(
             (p.PlanetName || p.Name) === 'Moon'
           );
           if (moonData) {
-            nakshatraLord = moonData.NakshatraLord || moonData.Nakshatra || 'Moon';
+            const rawLord = moonData.NakshatraLord || moonData.Nakshatra || 'Moon';
+            // Only accept known dasha planets; a Nakshatra name (e.g. Rohini) is not a lord
+            nakshatraLord = PLANET_DASHA_YEARS[rawLord] ? rawLord : 'Moon';
           }
         }
       }

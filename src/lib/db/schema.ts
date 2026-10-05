@@ -1,10 +1,11 @@
 import { sqliteTable, text, integer, real } from 'drizzle-orm/sqlite-core';
+import { sql } from 'drizzle-orm';
 
 export const users = sqliteTable('users', {
   id: integer('id').primaryKey({ autoIncrement: true }),
   name: text('name').notNull(),
   email: text('email').unique().notNull(),
-  createdAt: text('created_at').default('datetime("now")'),
+  createdAt: text('created_at').default(sql`DATETIME('now')`),
 });
 
 export const birthProfiles = sqliteTable('birth_profiles', {
@@ -18,14 +19,14 @@ export const birthProfiles = sqliteTable('birth_profiles', {
   latitude: real('latitude'),
   longitude: real('longitude'),
   timezone: text('timezone').default('UTC'),
-  createdAt: text('created_at').default('datetime("now")'),
+  createdAt: text('created_at').default(sql`DATETIME('now')`),
 });
 
 export const chartCache = sqliteTable('chart_cache', {
   cacheKey: text('cache_key').primaryKey(),
   data: text('data').notNull(),
   source: text('source').default('vedastro'),
-  fetchedAt: text('fetched_at').default('datetime("now")'),
+  fetchedAt: text('fetched_at').default(sql`DATETIME('now')`),
 });
 
 export const chatConversations = sqliteTable('chat_conversations', {
@@ -33,7 +34,7 @@ export const chatConversations = sqliteTable('chat_conversations', {
   userId: integer('user_id'),
   profileId: integer('profile_id'),
   title: text('title'),
-  createdAt: text('created_at').default('datetime("now")'),
+  createdAt: text('created_at').default(sql`DATETIME('now')`),
 });
 
 export const chatMessages = sqliteTable('chat_messages', {
@@ -41,7 +42,7 @@ export const chatMessages = sqliteTable('chat_messages', {
   conversationId: integer('conversation_id'),
   role: text('role').notNull(),
   content: text('content').notNull(),
-  createdAt: text('created_at').default('datetime("now")'),
+  createdAt: text('created_at').default(sql`DATETIME('now')`),
 });
 
 export type User = typeof users.$inferSelect;

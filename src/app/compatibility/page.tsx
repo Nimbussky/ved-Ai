@@ -1,6 +1,7 @@
 'use client';
 import React, { useState } from 'react';
 import Link from 'next/link';
+import { geocodeCity } from '@/lib/geocode';
 
 type CompatibilityResult = {
   score: number;
@@ -20,14 +21,30 @@ export default function CompatibilityPage() {
       setError('Please fill in both profiles completely.');
       return;
     }
+    if (!personA.place || !personB.place) {
+      setError('Please enter both birth cities so coordinates can be resolved.');
+      return;
+    }
     setError('');
     setLoading(true);
     setResult(null);
     try {
+      // Resolve both birth cities to coordinates (cached per name)
+      const [geoA, geoB] = await Promise.all([
+        geocodeCity(personA.place),
+        geocodeCity(personB.place),
+      ]);
+      if (!geoA || !geoB) {
+        setError('Could not find one of the cities. Please check spelling or try a nearby major city.');
+        setLoading(false);
+        return;
+      }
+      const profileA = { ...personA, latitude: geoA.latitude, longitude: geoA.longitude, timezone: geoA.timezone };
+      const profileB = { ...personB, latitude: geoB.latitude, longitude: geoB.longitude, timezone: geoB.timezone };
       const res = await fetch('/api/compatibility', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ profileA: personA, profileB: personB }),
+        body: JSON.stringify({ profileA, profileB }),
       });
       const data = await res.json();
       if (data.score !== undefined) {

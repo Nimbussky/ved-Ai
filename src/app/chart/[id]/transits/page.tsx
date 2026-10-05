@@ -27,9 +27,10 @@ export default function TransitsPage() {
     async function fetchTransits() {
       setLoading(true);
       try {
-        const res = await fetch(`/api/profiles/${id}/transits`);
-        const data = await res.json();
-        if (data.transits) setTransits(data.transits);
+        const res = await fetch(`/api/profiles/${id}/transits?date=${date}`);
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok || !data.transits) throw new Error(data.error || 'Transits fetch failed');
+        setTransits(data.transits);
       } catch {
         setTransits([]);
       } finally {
@@ -37,7 +38,7 @@ export default function TransitsPage() {
       }
     }
     fetchTransits();
-  }, [id]);
+  }, [id, date]);
 
   return (
     <div className="min-h-screen bg-[#0B1120] text-[#F7F7F5]">

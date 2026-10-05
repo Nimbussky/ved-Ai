@@ -7,7 +7,7 @@ export const mistralProvider: LLMProvider = {
   url: 'https://api.mistral.ai/v1/chat/completions',
   getApiKey: () => process.env.MISTRAL_API_KEY,
   model: 'open-mistral-nemo',
-  priority: 4,
+  priority: 7,
   supportsStreaming: true,
   buildHeaders: (key) => ({
     'Content-Type': 'application/json',

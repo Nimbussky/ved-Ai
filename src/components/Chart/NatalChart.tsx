@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useId, useState } from 'react';
 
 type Planet = {
   name: string;
@@ -45,12 +45,17 @@ const NatalChart: React.FC<{ planets?: Planet[]; onPlanetClick?: (planet: Planet
   const [isVisible, setIsVisible] = useState(false);
   const [chartData, setChartData] = useState<Planet[]>(planets);
   const [selectedPlanet, setSelectedPlanet] = useState<Planet | null>(null);
+  const uid = useId().replace(/[^a-zA-Z0-9]/g, '');
 
   useEffect(() => {
     setIsVisible(true);
 
-    if (planets.length === 0) {
-      const stored = typeof window !== 'undefined' ? localStorage.getItem('vedai_user_chart') : null;
+    // Fresh props win — sync them. Only fall back to storage when empty.
+    if (planets.length > 0) {
+      setChartData(planets);
+      return;
+    }
+    const stored = typeof window !== 'undefined' ? localStorage.getItem('vedai_user_chart') : null;
       if (stored) {
         try {
           const parsed = JSON.parse(stored);
@@ -63,10 +68,9 @@ const NatalChart: React.FC<{ planets?: Planet[]; onPlanetClick?: (planet: Planet
         } catch {
           setChartData(getDefaultPlanets());
         }
-      } else {
+    } else {
         setChartData(getDefaultPlanets());
       }
-    }
   }, [planets]);
 
   function handlePlanetClick(planet: Planet) {
@@ -83,17 +87,17 @@ const NatalChart: React.FC<{ planets?: Planet[]; onPlanetClick?: (planet: Planet
 
   const houseAngles = Array.from({ length: 12 }, (_, i) => (i * 30) * (Math.PI / 180));
 
-  const getSignIndex = (sign: string) => SIGN_NAMES.findIndex(s => s === sign);
+  const getSignIndex = (sign: string) => SIGN_NAMES.findIndex(s => s.toLowerCase() === (sign || '').toLowerCase());
 
   return (
     <div className={`relative transition-all duration-1000 transform ${isVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-90'}`}>
       <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
         <defs>
-          <radialGradient id="chartBg" cx="50%" cy="50%" r="50%">
+          <radialGradient id={`chartBg-${uid}`} cx="50%" cy="50%" r="50%">
             <stop offset="0%" stopColor="#1A2338" />
             <stop offset="100%" stopColor="#0B1120" />
           </radialGradient>
-          <filter id="glow">
+          <filter id={`glow-${uid}`}>
             <feGaussianBlur stdDeviation="2" result="coloredBlur" />
             <feMerge>
               <feMergeNode in="coloredBlur" />
@@ -102,7 +106,7 @@ const NatalChart: React.FC<{ planets?: Planet[]; onPlanetClick?: (planet: Planet
           </filter>
         </defs>
 
-        <circle cx={cx} cy={cy} r={outerR} fill="url(#chartBg)" stroke="#3B5BDB" strokeWidth="1" opacity="0.9" />
+        <circle cx={cx} cy={cy} r={outerR} fill={`url(#chartBg-${uid})`} stroke="#3B5BDB" strokeWidth="1" opacity="0.9" />
         <circle cx={cx} cy={cy} r={innerR} fill="none" stroke="#3B5BDB" strokeWidth="0.5" opacity="0.4" />
 
         {houseAngles.map((angle, i) => {
@@ -140,7 +144,7 @@ const NatalChart: React.FC<{ planets?: Planet[]; onPlanetClick?: (planet: Planet
           const isSelected = selectedPlanet?.name === planet.name;
 
           return (
-            <g key={planet.name} filter="url(#glow)" className="cursor-pointer" onClick={() => handlePlanetClick(planet)}>
+            <g key={planet.name} filter={`url(#glow-${uid})`} className="cursor-pointer" onClick={() => handlePlanetClick(planet)}>
               <circle cx={x} cy={y} r={isSelected ? 16 : 12} fill={color} opacity={isSelected ? 0.4 : 0.2} />
               <circle cx={x} cy={y} r={isSelected ? 10 : 8} fill={color} opacity="0.8" />
               <text x={x} y={y} textAnchor="middle" dominantBaseline="central" fill="#0B1120" fontSize="9" fontWeight="bold" fontFamily="serif">

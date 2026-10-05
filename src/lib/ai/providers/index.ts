@@ -43,10 +43,20 @@ export const ALL_PROVIDERS: LLMProvider[] = [
   ollamaProvider,         // local last
 ];
 
+/** Ollama only makes sense where it can actually run: local dev, or
+ *  production hosts with OLLAMA_ENABLED=true. Otherwise every chat would
+ *  waste a full provider timeout dialing an unreachable localhost. */
+export function isOllamaEnabled(): boolean {
+  if (process.env.OLLAMA_ENABLED === 'true') return true;
+  if (process.env.OLLAMA_ENABLED === 'false') return false;
+  if (process.env.OLLAMA_BASE_URL) return true;
+  return process.env.NODE_ENV !== 'production';
+}
+
 export function getActiveProviders(): LLMProvider[] {
   return ALL_PROVIDERS
     .filter((p) => {
-      if (p.slug === 'ollama') return true;
+      if (p.slug === 'ollama') return isOllamaEnabled();
       return !!p.getApiKey();
     })
     .sort((a, b) => a.priority - b.priority);
@@ -57,12 +67,15 @@ export function getProvider(slug: string): LLMProvider | undefined {
 }
 
 export function getProviderStatus() {
-  return ALL_PROVIDERS.map((p) => ({
-    name: p.name,
-    slug: p.slug,
-    model: p.model,
-    priority: p.priority,
-    hasKey: p.slug === 'ollama' ? true : !!p.getApiKey(),
-    available: p.slug === 'ollama' ? true : !!p.getApiKey(),
-  }));
+  return ALL_PROVIDERS.map((p) => {
+    const active = p.slug === 'ollama' ? isOllamaEnabled() : !!p.getApiKey();
+    return {
+      name: p.name,
+      slug: p.slug,
+      model: p.model,
+      priority: p.priority,
+      hasKey: p.slug === 'ollama' ? true : !!p.getApiKey(),
+      available: active,
+    };
+  });
 }

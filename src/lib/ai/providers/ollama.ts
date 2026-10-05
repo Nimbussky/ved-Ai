@@ -5,10 +5,10 @@ import type { LLMProvider } from './types';
 export const ollamaProvider: LLMProvider = {
   name: 'Ollama',
   slug: 'ollama',
-  url: `${process.env.OLLAMA_BASE_URL || 'http://localhost:11434'}/api/chat`,
+  url: `${(process.env.OLLAMA_BASE_URL || 'http://localhost:11434').replace(/\/+$/, '')}/api/chat`,
   getApiKey: () => 'local',
   model: 'llama3.3',
-  priority: 10,
+  priority: 16,
   supportsStreaming: true,
   buildHeaders: () => ({
     'Content-Type': 'application/json',

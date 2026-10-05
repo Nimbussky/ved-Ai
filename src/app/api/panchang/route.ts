@@ -105,7 +105,16 @@ export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
     const dateStr = searchParams.get('date') || new Date().toISOString().split('T')[0];
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
+      return Response.json(
+        { error: 'Invalid date parameter (expected YYYY-MM-DD)' },
+        { status: 400 }
+      );
+    }
     const date = new Date(dateStr + 'T12:00:00Z');
+    if (isNaN(date.getTime())) {
+      return Response.json({ error: 'Invalid date value' }, { status: 400 });
+    }
 
     const panchang = calculateRealPanchang(date);
 

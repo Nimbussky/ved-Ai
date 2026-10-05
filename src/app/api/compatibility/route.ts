@@ -9,9 +9,17 @@ async function getPlanets(profile: { date: string; time?: string; latitude: numb
     Longitude: String(profile.longitude),
     Timezone: profile.timezone || 'UTC',
   });
-  const res = await fetch(`${VEDASTRO_API}/api/PlanetPosition/${params.toString()}`, {
-    headers: { 'Accept': 'application/json' },
-  });
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 20000);
+  let res;
+  try {
+    res = await fetch(`${VEDASTRO_API}/api/PlanetPosition?${params.toString()}`, {
+      headers: { 'Accept': 'application/json' },
+      signal: controller.signal,
+    });
+  } finally {
+    clearTimeout(timeout);
+  }
   if (!res.ok) throw new Error('Failed to fetch chart');
   return res.json();
 }
@@ -28,14 +36,14 @@ export async function POST(request: Request) {
       );
     }
 
-    if (!profileA.date || !profileA.latitude || !profileA.longitude) {
+    if (!profileA.date || profileA.latitude == null || profileA.longitude == null) {
       return Response.json(
         { error: 'Profile A missing required fields: date, latitude, longitude' },
         { status: 400 }
       );
     }
 
-    if (!profileB.date || !profileB.latitude || !profileB.longitude) {
+    if (!profileB.date || profileB.latitude == null || profileB.longitude == null) {
       return Response.json(
         { error: 'Profile B missing required fields: date, latitude, longitude' },
         { status: 400 }

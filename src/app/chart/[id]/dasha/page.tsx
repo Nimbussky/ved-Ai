@@ -40,12 +40,11 @@ export default function DashaPage() {
     async function fetchDasha() {
       try {
         const res = await fetch(`/api/profiles/${id}/dasha`);
-        const data = await res.json();
-        if (data.dashas) {
-          setDashas(data.dashas);
-          const current = data.dashas.find((d: Dasha) => isCurrentPeriod(d.startDate, d.endDate));
-          if (current) setExpandedDasha(current.planet);
-        }
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok || !data.dashas) throw new Error(data.error || 'Dasha fetch failed');
+        setDashas(data.dashas);
+        const current = data.dashas.find((d: Dasha) => isCurrentPeriod(d.startDate, d.endDate));
+        if (current) setExpandedDasha(current.planet);
       } catch {
         setDashas([]);
       } finally {

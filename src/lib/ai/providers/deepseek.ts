@@ -7,7 +7,7 @@ export const deepSeekProvider: LLMProvider = {
   url: 'https://api.deepseek.com/chat/completions',
   getApiKey: () => process.env.DEEPSEEK_API_KEY,
   model: 'deepseek-chat',
-  priority: 3,
+  priority: 5,
   supportsStreaming: true,
   buildHeaders: (key) => ({
     'Content-Type': 'application/json',

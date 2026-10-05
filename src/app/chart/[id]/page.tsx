@@ -39,8 +39,9 @@ export default function ChartDetailPage() {
     async function fetchChart() {
       try {
         const res = await fetch(`/api/profiles/${id}/chart`);
-        const data = await res.json();
-        if (data.planets) setPlanets(data.planets);
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok || !data.planets) throw new Error(data.error || 'Chart fetch failed');
+        setPlanets(data.planets);
       } catch {
         // fallback to stored chart
         const stored = localStorage.getItem('vedai_user_chart');

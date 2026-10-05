@@ -45,9 +45,10 @@ export default function Dashboard() {
       } catch {}
     }
 
-    // Count saved charts
+    // Count saved charts (main local chart + any named profiles)
     const chartKeys = Object.keys(localStorage).filter(k => k.startsWith('vedai_profile_'));
-    setChartCount(chartKeys.length + 1); // +1 for the main chart
+    const hasMain = !!localStorage.getItem('vedai_user_chart');
+    setChartCount(chartKeys.length + (hasMain ? 1 : 0));
 
     const abortController = new AbortController();
 
