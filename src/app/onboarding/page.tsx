@@ -19,6 +19,7 @@ const OnboardingUI: React.FC = () => {
     }
   }, [router]);
 
+  const loadSampleData = () => { setFormData({ name: 'Sample User', dob: '1990-01-15', timeOfBirth: '10:30', placeOfBirth: 'San Francisco, CA' }); setStep(4); };
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (step < 4) {
@@ -115,6 +116,7 @@ const OnboardingUI: React.FC = () => {
         <button type="submit" disabled={isLoading} className="w-full mt-8 bg-[#D4A24C] hover:bg-[#b5883b] text-[#0B1120] font-bold rounded-lg text-sm px-5 py-3 text-center transition-colors disabled:opacity-70 disabled:cursor-not-allowed">
           {isLoading ? 'Generating Chart...' : step === 4 ? 'Generate Chart' : 'Continue'}
         </button>
+        <button type="button" onClick={loadSampleData} className="w-full mt-3 border border-[#D4A24C] text-[#D4A24C] hover:bg-[#D4A24C]/10 rounded-lg text-sm px-5 py-3 text-center transition-colors cursor-pointer">Load sample birth data</button>
       </form>
     </div>
   );
